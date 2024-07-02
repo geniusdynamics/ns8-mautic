@@ -30,5 +30,17 @@ maria_db = {
 }
 agent.write_envfile("database.env", maria_db)
 
+
+app_config = {
+    "MAUTIC_DB_HOST": "mariadb-app",
+    "MAUTIC_DB_PORT": "3306",
+    "MAUTIC_DB_DATABASE": MARIADB_DATABASE,
+    "MAUTIC_DB_USER": MARIADB_USER,
+    "MAUTIC_DB_PASSWORD": MARIADB_PASSWORD,
+    "MAUTIC_MESSENGER_DSN_EMAIL": "doctrine://default",
+    "MAUTIC_MESSENGER_DSN_HIT": "doctrine://default"
+}
+agent.write_envfile("app.env", app_config)
+
 # just before starting systemd unit
 #agent.dump_env()

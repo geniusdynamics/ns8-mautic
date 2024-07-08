@@ -1,19 +1,19 @@
 {
   "name": "mautic",
   "description": {
-    "en": "My mautic module"
+    "en": "Mautic & Open Source Marketing Automation"
   },
   "categories": [],
   "authors": [
     {
-      "name": "Name Surname",
-      "email": "author@yourmail.org"
+      "name": "Kemboi Elvis",
+      "email": "kemboielvis@genius.ke"
     }
   ],
   "docs": {
-    "documentation_url": "https://docs.mautic.com/",
-    "bug_url": "https://github.com/NethServer/dev",
-    "code_url": "https://github.com/author/ns8-mautic"
+    "documentation_url": "https://www.mautic.org/",
+    "bug_url": "https://github.com/geniusdynamics/dev",
+    "code_url": "https://github.com/geniusdynamics/ns8-mautic"
   },
-  "source": "ghcr.io/nethserver/mautic"
+  "source": "ghcr.io/geniusdynamics/mautic"
 }

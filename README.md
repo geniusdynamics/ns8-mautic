@@ -1,44 +1,19 @@
 # ns8-mautic
 
-This is a template module for [NethServer 8](https://github.com/NethServer/ns8-core).
-To start a new module from it:
-
-1. Click on [Use this template](https://github.com/NethServer/ns8-mautic/generate).
-   Name your repo with `ns8-` prefix (e.g. `ns8-mymodule`). 
-   Do not end your module name with a number, like ~~`ns8-baaad2`~~!
-
-1. Clone the repository, enter the cloned directory and
-   [configure your GIT identity](https://git-scm.com/book/en/v2/Getting-Started-First-Time-Git-Setup#_your_identity)
-
-1. Rename some references inside the repo:
-   ```
-   modulename=$(basename $(pwd) | sed 's/^ns8-//') &&
-   git mv imageroot/systemd/user/mautic.service imageroot/systemd/user/${modulename}.service &&
-   git mv imageroot/systemd/user/mautic-app.service imageroot/systemd/user/${modulename}-app.service && 
-   git mv tests/mautic.robot tests/${modulename}.robot &&
-   sed -i "s/mautic/${modulename}/g" $(find .github/ * -type f) &&
-   git commit -a -m "Repository initialization"
-   ```
-
-1. Edit this `README.md` file, by replacing this section with your module
-   description
-
-1. Adjust `.github/workflows` to your needs. `clean-registry.yml` might
-   need the proper list of image names to work correctly. Unused workflows
-   can be disabled from the GitHub Actions interface.
-
-1. Commit and push your local changes
 
 ## Install
 
 Instantiate the module with:
 
-    add-module ghcr.io/nethserver/mautic:latest 1
+```shell
+  add-module ghcr.io/geniusdynamics/mautic:latest 1
+```
+  
 
 The output of the command will return the instance name.
 Output example:
 
-    {"module_id": "mautic1", "image_name": "mautic", "image_url": "ghcr.io/nethserver/mautic:latest"}
+    {"module_id": "mautic1", "image_name": "mautic", "image_url": "ghcr.io/geniusdynamics/mautic:latest"}
 
 ## Configure
 
@@ -76,8 +51,10 @@ api-cli run get-configuration --agent module/mautic1
 ## Uninstall
 
 To uninstall the instance:
-
-    remove-module --no-preserve mautic1
+```shell
+  remove-module --no-preserve mautic1
+```
+  
 
 ## Smarthost setting discovery
 
@@ -85,7 +62,7 @@ Some configuration settings, like the smarthost setup, are not part of the
 `configure-module` action input: they are discovered by looking at some
 Redis keys.  To ensure the module is always up-to-date with the
 centralized [smarthost
-setup](https://nethserver.github.io/ns8-core/core/smarthost/) every time
+setup](https://geniusdynamics.github.io/ns8-core/core/smarthost/) every time
 mautic starts, the command `bin/discover-smarthost` runs and refreshes
 the `state/smarthost.env` file with fresh values from Redis.
 
@@ -157,7 +134,7 @@ podman exec -ti   mautic-app sh
 Test the module using the `test-module.sh` script:
 
 
-    ./test-module.sh <NODE_ADDR> ghcr.io/nethserver/mautic:latest
+    ./test-module.sh <NODE_ADDR> ghcr.io/geniusdynamics/mautic:latest
 
 The tests are made using [Robot Framework](https://robotframework.org/)
 

@@ -22,8 +22,6 @@ def generate_random_password(length):
     return password[:length]
 
 
-# This is specific to you module, so you need to change it accordingly.
-
 MARIADB_ROOT_PASSWORD = generate_random_password(16)
 MARIADB_DATABASE = data.get("MARIADB_DATABASE", "mautic")
 MARIADB_USER = data.get("MARIADB_USER", "mautic")

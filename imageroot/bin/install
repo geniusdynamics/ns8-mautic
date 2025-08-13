@@ -1,0 +1,33 @@
+#!/bin/bash
+
+#
+# Copyright (C) 2022 Nethesis S.r.l.
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+
+if [ -f "/var/www/html/config/local.php" ]; then
+	echo "Mautic already installed — skipping installation."
+else
+	echo "No installation found — running Mautic installer."
+	php bin/console mautic:install \
+		--db_driver=pdo_mysql \
+		--db_host="$MAUTIC_DB_HOST" \
+		--db_port="$MAUTIC_DB_PORT" \
+		--db_name="$MAUTIC_DB_DATABASE" \
+		--db_user="$MAUTIC_DB_USER" \
+		--db_password="$MAUTIC_DB_PASSWORD" \
+		--admin_firstname="$MAUTIC_ADMIN_FIRSTNAME" \
+		--admin_lastname="$MAUTIC_ADMIN_LASTNAME" \
+		--admin_username="$MAUTIC_ADMIN_USERNAME" \
+		--admin_email="$MAUTIC_ADMIN_EMAIL" \
+		--admin_password="$MAUTIC_ADMIN_PASSWORD" \
+		--mailer_from_name="Mautic" \
+		--mailer_from_email="$MAUTIC_ADMIN_EMAIL" \
+		--mailer_transport=smtp \
+		--mailer_host="$SMTP_HOST" \
+		--mailer_port="$SMTP_PORT" \
+		--mailer_user="$SMTP_USERNAME" \
+		--mailer_password="$SMTP_PASSWORD" \
+		--mailer_encryption="$SMTP_ENCRYPTION" \
+		--mailer_auth_mode=login
+fi

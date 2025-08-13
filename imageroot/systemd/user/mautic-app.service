@@ -12,6 +12,8 @@ After=mautic.service mariadb-app.service
 Environment=PODMAN_SYSTEMD_UNIT=%n
 EnvironmentFile=%S/state/environment
 EnvironmentFile=-%S/state/smarthost.env
+EnvironmentFile=-%S/state/app.env
+EnvironmentFile=-%S/state/mautic.env
 WorkingDirectory=%S/state
 Restart=always
 TimeoutStopSec=70
@@ -26,8 +28,9 @@ ExecStart=/usr/bin/podman run --conmon-pidfile %t/mautic-app.pid \
     --volume mautic-files:/var/www/html/docroot/media/files:z \
     --volume mautic-images:/var/www/html/docroot/media/images:z \
     --volume mautic-cron:/opt/mautic/cron:z \
+    --volume %S/bin/install:/install:z \
     --env-file=%S/state/app.env \
-    ${MAUTIC_IMAGE}
+    ${MAUTIC_IMAGE} /bin/bash -c "/install"
 ExecStop=/usr/bin/podman stop --ignore --cidfile %t/mautic-app.ctr-id -t 10
 ExecReload=/usr/bin/podman kill -s HUP mautic-app
 SyslogIdentifier=%u

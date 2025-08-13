@@ -18,9 +18,16 @@ import agent
 config = {}
 
 # Read current configuration from the environment file
-config["host"] = os.getenv("TRAEFIK_HOST","")
+config["host"] = os.getenv("TRAEFIK_HOST", "")
 config["http2https"] = os.getenv("TRAEFIK_HTTP2HTTPS") == "True"
 config["lets_encrypt"] = os.getenv("TRAEFIK_LETS_ENCRYPT") == "True"
-
+if os.path.exists("mautic.env"):
+    mautic_env = agent.read_envfile("mautic.env")
+    # Append admin fields (default to empty string if not set)
+    config["admin_firstname"] = mautic_env.get("MAUTIC_ADMIN_FIRSTNAME", "")
+    config["admin_lastname"] = mautic_env.get("MAUTIC_ADMIN_LASTNAME", "")
+    config["admin_username"] = mautic_env.get("MAUTIC_ADMIN_USERNAME", "")
+    config["admin_email"] = mautic_env.get("MAUTIC_ADMIN_EMAIL", "")
+    config["admin_password"] = mautic_env.get("MAUTIC_ADMIN_PASSWORD", "")
 # Dump the configuration to stdout
 json.dump(config, fp=sys.stdout)

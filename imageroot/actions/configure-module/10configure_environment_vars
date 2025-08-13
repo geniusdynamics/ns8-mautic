@@ -13,34 +13,6 @@ import agent
 # If parsing fails, output everything to stderr
 data = json.load(sys.stdin)
 
-#This is specific to you module, so you need to change it accordingly.
-
-MARIADB_ROOT_PASSWORD = data.get("MARIADB_ROOT_PASSWORD", "Nethesis@1234")
-MARIADB_DATABASE = data.get("MARIADB_DATABASE", "mautic")
-MARIADB_USER = data.get("MARIADB_USER", "mautic")
-MARIADB_PASSWORD = data.get("MARIADB_PASSWORD", "Nethesis@1234")
-MARIADB_AUTO_UPGRADE = data.get("MARIADB_AUTO_UPGRADE", "1")
-
-maria_db = {
-    "MARIADB_ROOT_PASSWORD": MARIADB_ROOT_PASSWORD,
-    "MARIADB_DATABASE": MARIADB_DATABASE,
-    "MARIADB_USER": MARIADB_USER,
-    "MARIADB_PASSWORD": MARIADB_PASSWORD,
-    "MARIADB_AUTO_UPGRADE": MARIADB_AUTO_UPGRADE
-}
-agent.write_envfile("database.env", maria_db)
-
-
-app_config = {
-    "MAUTIC_DB_HOST": "mariadb-app",
-    "MAUTIC_DB_PORT": "3306",
-    "MAUTIC_DB_DATABASE": MARIADB_DATABASE,
-    "MAUTIC_DB_USER": MARIADB_USER,
-    "MAUTIC_DB_PASSWORD": MARIADB_PASSWORD,
-    "MAUTIC_MESSENGER_DSN_EMAIL": "doctrine://default",
-    "MAUTIC_MESSENGER_DSN_HIT": "doctrine://default"
-}
-agent.write_envfile("app.env", app_config)
 
 # just before starting systemd unit
-#agent.dump_env()
+# agent.dump_env()

@@ -28,14 +28,11 @@ trap 'rm -rfv initdb.d/' EXIT
 # at the end of mautic_restore.sh the dump is loaded and
 # we exit the container
 podman run \
-  --rm \
-  --interactive \
-  --network=none \
-  --volume=./initdb.d:/docker-entrypoint-initdb.d:z \
-  --volume mysql-data:/var/lib/mysql/:Z \
-  --env MARIADB_ROOT_PASSWORD=Nethesis,1234 \
-  --env MARIADB_DATABASE=mautic \
-  --env MARIADB_USER=mautic \
-  --env MARIADB_PASSWORD=mautic \
-  --replace --name=restore_db \
-  ${MARIADB_IMAGE}
+	--rm \
+	--interactive \
+	--network=none \
+	--volume=./initdb.d:/docker-entrypoint-initdb.d:z \
+	--volume mysql-data:/var/lib/mysql/:Z \
+	--env-file=database.env \
+	--replace --name=restore_db \
+	${MARIADB_IMAGE}

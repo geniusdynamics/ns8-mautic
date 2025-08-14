@@ -101,7 +101,7 @@
             >
             </cv-text-input>
 
-            <cv-password-input
+            <cv-text-input
               :label="$t('settings.admin_password')"
               placeholder="********"
               v-model="adminPassword"
@@ -109,7 +109,7 @@
               :invalid-message="$t(error.adminPassword)"
               :disabled="loading.getConfiguration || loading.configureModule"
             >
-            </cv-password-input>
+            </cv-text-input>
             <!-- advanced options -->
             <cv-accordion ref="accordion" class="maxwidth mg-bottom">
               <cv-accordion-item :open="toggleAccordion[0]">

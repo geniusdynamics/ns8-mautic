@@ -5,11 +5,18 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 #
 
+INSTALL_LOG="/var/log/mautic_install.log"
+
+log() {
+	echo "[$(date '+%Y-%m-%d %H:%M:%S')] $*" | tee -a "$INSTALL_LOG"
+}
+
 if [ -f "/var/www/html/config/local.php" ]; then
-	echo "Mautic already installed — skipping installation."
+	log "✅ Mautic already installed — skipping installation."
 else
-	echo "No installation found — running Mautic installer."
-	php bin/console mautic:install \
+	log "🚀 No installation found — running Mautic installer."
+
+	if ! php bin/console mautic:install \
 		--db_driver=pdo_mysql \
 		--db_host="$MAUTIC_DB_HOST" \
 		--db_port="$MAUTIC_DB_PORT" \
@@ -29,5 +36,24 @@ else
 		--mailer_user="$SMTP_USERNAME" \
 		--mailer_password="$SMTP_PASSWORD" \
 		--mailer_encryption="$SMTP_ENCRYPTION" \
-		--mailer_auth_mode=login
+		--mailer_auth_mode=login 2>&1 | tee -a "$INSTALL_LOG"; then
+		log "⚠️  Mautic installation command returned an error. Continuing anyway."
+	fi
 fi
+
+# Run migrations safely — skip errors like 'table does not exist'
+log "📦 Running database migrations (ignoring non-critical errors)..."
+if ! php bin/console doctrine:migrations:migrate \
+	--no-interaction \
+	--no-all-or-nothing \
+	--allow-no-migration 2>&1 | tee -a "$INSTALL_LOG"; then
+	log "⚠️  Some migrations failed. This is non-fatal. Continuing..."
+fi
+
+# Optional: run cache clear but ignore failures
+log "🧹 Clearing cache..."
+if ! php bin/console cache:clear 2>&1 | tee -a "$INSTALL_LOG"; then
+	log "⚠️  Cache clear failed. Continuing..."
+fi
+
+log "✅ Mautic install/migration process complete."

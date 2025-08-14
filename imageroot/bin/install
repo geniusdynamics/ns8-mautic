@@ -39,21 +39,20 @@ else
 		--mailer_auth_mode=login 2>&1 | tee -a "$INSTALL_LOG"; then
 		log "⚠️  Mautic installation command returned an error. Continuing anyway."
 	fi
-fi
+	# Run migrations safely — skip errors like 'table does not exist'
+	log "📦 Running database migrations (ignoring non-critical errors)..."
+	if ! php bin/console doctrine:migrations:migrate \
+		--no-interaction \
+		--no-all-or-nothing \
+		--allow-no-migration 2>&1 | tee -a "$INSTALL_LOG"; then
+		log "⚠️  Some migrations failed. This is non-fatal. Continuing..."
+	fi
 
-# Run migrations safely — skip errors like 'table does not exist'
-log "📦 Running database migrations (ignoring non-critical errors)..."
-if ! php bin/console doctrine:migrations:migrate \
-	--no-interaction \
-	--no-all-or-nothing \
-	--allow-no-migration 2>&1 | tee -a "$INSTALL_LOG"; then
-	log "⚠️  Some migrations failed. This is non-fatal. Continuing..."
-fi
-
-# Optional: run cache clear but ignore failures
-log "🧹 Clearing cache..."
-if ! php bin/console cache:clear 2>&1 | tee -a "$INSTALL_LOG"; then
-	log "⚠️  Cache clear failed. Continuing..."
+	# Optional: run cache clear but ignore failures
+	log "🧹 Clearing cache..."
+	if ! php bin/console cache:clear 2>&1 | tee -a "$INSTALL_LOG"; then
+		log "⚠️  Cache clear failed. Continuing..."
+	fi
 fi
 
 log "✅ Mautic install/migration process complete."

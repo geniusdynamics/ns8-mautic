@@ -27,16 +27,7 @@ else
 		--admin_lastname="$MAUTIC_ADMIN_LASTNAME" \
 		--admin_username="$MAUTIC_ADMIN_USERNAME" \
 		--admin_email="$MAUTIC_ADMIN_EMAIL" \
-		--admin_password="$MAUTIC_ADMIN_PASSWORD" \
-		--mailer_from_name="Mautic" \
-		--mailer_from_email="$MAUTIC_ADMIN_EMAIL" \
-		--mailer_transport=smtp \
-		--mailer_host="$SMTP_HOST" \
-		--mailer_port="$SMTP_PORT" \
-		--mailer_user="$SMTP_USERNAME" \
-		--mailer_password="$SMTP_PASSWORD" \
-		--mailer_encryption="$SMTP_ENCRYPTION" \
-		--mailer_auth_mode=login 2>&1 | tee -a "$INSTALL_LOG"; then
+		--admin_password="$MAUTIC_ADMIN_PASSWORD" "$SITE_URL" | tee -a "$INSTALL_LOG"; then
 		log "⚠️  Mautic installation command returned an error. Continuing anyway."
 	fi
 	# Run migrations safely — skip errors like 'table does not exist'
@@ -53,6 +44,7 @@ else
 	if ! php bin/console cache:clear 2>&1 | tee -a "$INSTALL_LOG"; then
 		log "⚠️  Cache clear failed. Continuing..."
 	fi
+	chown -R www-data:www-data /var/www/html/config
 fi
 
 log "✅ Mautic install/migration process complete."

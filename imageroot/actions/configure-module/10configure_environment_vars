@@ -12,12 +12,14 @@ import agent
 # Try to parse the stdin as JSON.
 # If parsing fails, output everything to stderr
 data = json.load(sys.stdin)
+host = data.get("host")
 mautic_env = {
     "MAUTIC_ADMIN_FIRSTNAME": data.get("admin_firstname", ""),
     "MAUTIC_ADMIN_LASTNAME": data.get("admin_lastname", ""),
     "MAUTIC_ADMIN_USERNAME": data.get("admin_username", ""),
     "MAUTIC_ADMIN_EMAIL": data.get("admin_email", ""),
     "MAUTIC_ADMIN_PASSWORD": data.get("admin_password", ""),
+    "SITE_URL": f"https://{host}",
 }
 agent.write_envfile("mautic.env", mautic_env)
 

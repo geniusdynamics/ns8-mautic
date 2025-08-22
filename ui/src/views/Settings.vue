@@ -301,7 +301,7 @@ export default {
         this.error.adminPassword = "common.required";
         isValidationOk = false;
       }
-      if (!this.adminPassword.length < 6) {
+      if (this.adminPassword.length < 6) {
         this.error.adminPassword = "Password must be more than 6 characters";
         isValidationOk = false;
       }

@@ -106,6 +106,7 @@
               placeholder="********"
               v-model="adminPassword"
               class="mg-bottom"
+              type="password"
               :invalid-message="$t(error.adminPassword)"
               :disabled="loading.getConfiguration || loading.configureModule"
             >
@@ -114,7 +115,15 @@
             <cv-accordion ref="accordion" class="maxwidth mg-bottom">
               <cv-accordion-item :open="toggleAccordion[0]">
                 <template slot="title">{{ $t("settings.advanced") }}</template>
-                <template slot="content"> </template>
+                <template slot="content">
+                  <cv-text-input
+                    :label="$t('settings.db_password')"
+                    placeholder="DB Password"
+                    v-model="db_password"
+                    type="password"
+                    readonly
+                  ></cv-text-input>
+                </template>
               </cv-accordion-item>
             </cv-accordion>
             <cv-row v-if="error.configureModule">
@@ -178,6 +187,7 @@ export default {
       adminUsername: "",
       adminEmail: "",
       adminPassword: "",
+      db_password: "",
       loading: {
         getConfiguration: false,
         configureModule: false,
@@ -265,6 +275,7 @@ export default {
       this.adminUsername = config.admin_username;
       this.adminEmail = config.admin_email;
       this.adminPassword = config.admin_password;
+      this.db_password = config.db_password;
 
       this.loading.getConfiguration = false;
       this.focusElement("host");

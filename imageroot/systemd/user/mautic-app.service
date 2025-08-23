@@ -32,7 +32,7 @@ ExecStart=/usr/bin/podman run --conmon-pidfile %t/mautic-app.pid \
     --env-file=%S/state/app.env \
     --env-file=%S/state/mautic.env \
     ${MAUTIC_IMAGE}
-ExecStartPost=/usr/bin/podman exec mautic-app /bin/bash -c "/install"
+# ExecStartPost=/usr/bin/podman exec mautic-app /bin/bash -c "/install"
 ExecStop=/usr/bin/podman stop --ignore --cidfile %t/mautic-app.ctr-id -t 10
 ExecReload=/usr/bin/podman kill -s HUP mautic-app
 SyslogIdentifier=%u

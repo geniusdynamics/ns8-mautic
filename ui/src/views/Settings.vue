@@ -61,56 +61,6 @@
                 $t("settings.enabled")
               }}</template>
             </cv-toggle>
-            <cv-text-input
-              :label="$t('settings.admin_firstname')"
-              placeholder="John"
-              v-model.trim="adminFirstname"
-              class="mg-bottom"
-              :invalid-message="$t(error.adminFirstname)"
-              :disabled="loading.getConfiguration || loading.configureModule"
-            >
-            </cv-text-input>
-
-            <cv-text-input
-              :label="$t('settings.admin_lastname')"
-              placeholder="Doe"
-              v-model.trim="adminLastname"
-              class="mg-bottom"
-              :invalid-message="$t(error.adminLastname)"
-              :disabled="loading.getConfiguration || loading.configureModule"
-            >
-            </cv-text-input>
-
-            <cv-text-input
-              :label="$t('settings.admin_username')"
-              placeholder="admin"
-              v-model.trim="adminUsername"
-              class="mg-bottom"
-              :invalid-message="$t(error.adminUsername)"
-              :disabled="loading.getConfiguration || loading.configureModule"
-            >
-            </cv-text-input>
-
-            <cv-text-input
-              :label="$t('settings.admin_email')"
-              placeholder="admin@example.org"
-              v-model="adminEmail"
-              class="mg-bottom"
-              :invalid-message="$t(error.adminEmail)"
-              :disabled="loading.getConfiguration || loading.configureModule"
-            >
-            </cv-text-input>
-
-            <cv-text-input
-              :label="$t('settings.admin_password')"
-              placeholder="********"
-              v-model="adminPassword"
-              class="mg-bottom"
-              type="password"
-              :invalid-message="$t(error.adminPassword)"
-              :disabled="loading.getConfiguration || loading.configureModule"
-            >
-            </cv-text-input>
             <!-- advanced options -->
             <cv-accordion ref="accordion" class="maxwidth mg-bottom">
               <cv-accordion-item :open="toggleAccordion[0]">
@@ -182,11 +132,6 @@ export default {
       host: "",
       isLetsEncryptEnabled: false,
       isHttpToHttpsEnabled: true,
-      adminFirstname: "",
-      adminLastname: "",
-      adminUsername: "",
-      adminEmail: "",
-      adminPassword: "",
       db_password: "",
       loading: {
         getConfiguration: false,
@@ -198,11 +143,6 @@ export default {
         host: "",
         lets_encrypt: "",
         http2https: "",
-        adminFirstname: "",
-        adminLastname: "",
-        adminUsername: "",
-        adminEmail: "",
-        adminPassword: "",
       },
     };
   },
@@ -270,11 +210,6 @@ export default {
       this.host = config.host;
       this.isLetsEncryptEnabled = config.lets_encrypt;
       this.isHttpToHttpsEnabled = config.http2https;
-      this.adminFirstname = config.admin_firstname;
-      this.adminLastname = config.admin_lastname;
-      this.adminUsername = config.admin_username;
-      this.adminEmail = config.admin_email;
-      this.adminPassword = config.admin_password;
       this.db_password = config.db_password;
 
       this.loading.getConfiguration = false;
@@ -290,30 +225,6 @@ export default {
         if (isValidationOk) {
           this.focusElement("host");
         }
-        isValidationOk = false;
-      }
-      if (!this.adminFirstname) {
-        this.error.adminFirstname = "common.required";
-        isValidationOk = false;
-      }
-      if (!this.adminLastname) {
-        this.error.adminLastname = "common.required";
-        isValidationOk = false;
-      }
-      if (!this.adminUsername) {
-        this.error.adminUsername = "common.required";
-        isValidationOk = false;
-      }
-      if (!this.adminEmail) {
-        this.error.adminEmail = "common.required";
-        isValidationOk = false;
-      }
-      if (!this.adminPassword) {
-        this.error.adminPassword = "common.required";
-        isValidationOk = false;
-      }
-      if (this.adminPassword.length < 6) {
-        this.error.adminPassword = "Password must be more than 6 characters";
         isValidationOk = false;
       }
       return isValidationOk;
@@ -369,11 +280,6 @@ export default {
             host: this.host,
             lets_encrypt: this.isLetsEncryptEnabled,
             http2https: this.isHttpToHttpsEnabled,
-            admin_firstname: this.adminFirstname,
-            admin_lastname: this.adminLastname,
-            admin_username: this.adminUsername,
-            admin_email: this.adminEmail,
-            admin_password: this.adminPassword,
           },
           extra: {
             title: this.$t("settings.instance_configuration", {

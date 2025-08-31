@@ -12,7 +12,11 @@ import agent
 # Try to parse the stdin as JSON.
 # If parsing fails, output everything to stderr
 data = json.load(sys.stdin)
-
+host = data.get("host")
+mautic_env = {
+    "SITE_URL": f"https://{host}",
+}
+agent.write_envfile("mautic.env", mautic_env)
 
 # just before starting systemd unit
 # agent.dump_env()

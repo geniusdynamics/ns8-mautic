@@ -61,11 +61,18 @@
                 $t("settings.enabled")
               }}</template>
             </cv-toggle>
-              <!-- advanced options -->
+            <!-- advanced options -->
             <cv-accordion ref="accordion" class="maxwidth mg-bottom">
               <cv-accordion-item :open="toggleAccordion[0]">
                 <template slot="title">{{ $t("settings.advanced") }}</template>
                 <template slot="content">
+                  <cv-text-input
+                    :label="$t('settings.db_password')"
+                    placeholder="DB Password"
+                    v-model="db_password"
+                    type="password"
+                    readonly
+                  ></cv-text-input>
                 </template>
               </cv-accordion-item>
             </cv-accordion>
@@ -125,6 +132,7 @@ export default {
       host: "",
       isLetsEncryptEnabled: false,
       isHttpToHttpsEnabled: true,
+      db_password: "",
       loading: {
         getConfiguration: false,
         configureModule: false,
@@ -164,13 +172,13 @@ export default {
       // register to task error
       this.core.$root.$once(
         `${taskAction}-aborted-${eventId}`,
-        this.getConfigurationAborted
+        this.getConfigurationAborted,
       );
 
       // register to task completion
       this.core.$root.$once(
         `${taskAction}-completed-${eventId}`,
-        this.getConfigurationCompleted
+        this.getConfigurationCompleted,
       );
 
       const res = await to(
@@ -181,7 +189,7 @@ export default {
             isNotificationHidden: true,
             eventId,
           },
-        })
+        }),
       );
       const err = res[0];
 
@@ -202,6 +210,7 @@ export default {
       this.host = config.host;
       this.isLetsEncryptEnabled = config.lets_encrypt;
       this.isHttpToHttpsEnabled = config.http2https;
+      this.db_password = config.db_password;
 
       this.loading.getConfiguration = false;
       this.focusElement("host");
@@ -250,19 +259,19 @@ export default {
       // register to task error
       this.core.$root.$once(
         `${taskAction}-aborted-${eventId}`,
-        this.configureModuleAborted
+        this.configureModuleAborted,
       );
 
       // register to task validation
       this.core.$root.$once(
         `${taskAction}-validation-failed-${eventId}`,
-        this.configureModuleValidationFailed
+        this.configureModuleValidationFailed,
       );
 
       // register to task completion
       this.core.$root.$once(
         `${taskAction}-completed-${eventId}`,
-        this.configureModuleCompleted
+        this.configureModuleCompleted,
       );
       const res = await to(
         this.createModuleTaskForApp(this.instanceName, {
@@ -279,7 +288,7 @@ export default {
             description: this.$t("settings.configuring"),
             eventId,
           },
-        })
+        }),
       );
       const err = res[0];
 

@@ -38,7 +38,12 @@
     "instance_configuration": "Configure mautic",
     "domain_already_used_in_traefik": "Domain already used in traefik",
     "host_pattern": "Must be a valid fully qualified domain name",
-    "host_format": "Must be a valid fully qualified domain name"
+    "host_format": "Must be a valid fully qualified domain name",
+    "admin_firstname": "Admin first name",
+    "admin_lastname": "Admin last name",
+    "admin_username": "Admin username",
+    "admin_email": "Admin email",
+    "admin_password": "Admin password"
   },
   "about": {
     "title": "About"

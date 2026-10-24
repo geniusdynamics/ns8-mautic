@@ -14,7 +14,7 @@ images=()
 repobase="${REPOBASE:-ghcr.io/geniusdynamics}"
 # Configure the image name
 reponame="mautic"
-mautic_version="6.0.7-apache"
+mautic_version="6.0.9-apache"
 
 # Create a new empty container image
 container=$(buildah from scratch)

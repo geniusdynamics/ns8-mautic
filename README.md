@@ -1,148 +1,279 @@
 # ns8-mautic
 
+[![Build Status](https://github.com/geniusdynamics/ns8-mautic/workflows/test-module/badge.svg)](https://github.com/geniusdynamics/ns8-mautic/actions)
 
-## Install
+Mautic module for NethServer 8 (NS8). This repository packages Mautic, an open-source marketing automation platform, with a MariaDB database and exposes it through the NS8 gateway (Traefik) with optional Let's Encrypt TLS.
 
-Instantiate the module with:
+- **Image**: `ghcr.io/geniusdynamics/mautic:latest`
+- **Orchestrator**: NS8 modules (podman-based)
+- **Status**: Stable for evaluation and lab use
 
-```shell
-  add-module ghcr.io/geniusdynamics/mautic:latest 1
+## Table of Contents
+
+- [Overview](#overview)
+- [Prerequisites](#prerequisites)
+- [Quick Start](#quick-start)
+- [Configuration Reference](#configuration-reference)
+- [Update the Module](#update-the-module)
+- [Uninstall](#uninstall)
+- [Smarthost Discovery (SMTP)](#smarthost-discovery-smtp)
+- [Debugging](#debugging)
+- [Testing](#testing)
+- [UI Development and Translation](#ui-development-and-translation)
+- [Troubleshooting](#troubleshooting)
+- [Contributing](#contributing)
+- [License](#license)
+
+## Overview
+
+This module integrates Mautic into NethServer 8, providing a complete marketing automation solution. It includes:
+
+- Mautic application container
+- MariaDB database for data persistence
+- Traefik reverse proxy for secure access
+- Optional Let's Encrypt SSL certificates
+- UI components for NS8 management interface
+
+The module supports dynamic SMTP configuration via smarthost discovery and includes comprehensive testing with Robot Framework.
+
+---
+
+## Prerequisites
+
+Before installing the ns8-mautic module, ensure you have:
+
+- A running NethServer 8 (NS8) node with admin access
+- A public DNS record pointing to your NS8 gateway (e.g., `mautic.example.com`)
+- Ports 80 and 443 reachable from the internet if using Let's Encrypt for automatic HTTPS
+- Basic familiarity with NS8 module management and Podman containers
+
+## Quick Start
+
+Follow these steps to install, configure, and access Mautic on NS8:
+
+### 1. Install the Module
+
+Install the module image and create an instance:
+
+```bash
+add-module ghcr.io/geniusdynamics/mautic:latest 1
 ```
-  
 
-The output of the command will return the instance name.
-Output example:
+This command returns a JSON object. Note the `module_id`, for example:
 
-    {"module_id": "mautic1", "image_name": "mautic", "image_url": "ghcr.io/geniusdynamics/mautic:latest"}
-
-## Configure
-
-Let's assume that the mattermost instance is named `mautic1`.
-
-Launch `configure-module`, by setting the following parameters:
-- `host`: a fully qualified domain name for the application
-- `http2https`: enable or disable HTTP to HTTPS redirection (true/false)
-- `lets_encrypt`: enable or disable Let's Encrypt certificate (true/false)
-
-
-Example:
-
-```
-api-cli run configure-module --agent module/mautic1 --data - <<EOF
+```json
 {
-  "host": "mautic.domain.com",
+  "module_id": "mautic1",
+  "image_name": "mautic",
+  "image_url": "ghcr.io/geniusdynamics/mautic:latest"
+}
+```
+
+### 2. Configure the Instance
+
+Replace `mautic1` with your instance ID and adjust the domain and options:
+
+```bash
+api-cli run configure-module --agent module/mautic1 --data - <<'EOF'
+{
+  "host": "mautic.example.com",
   "http2https": true,
   "lets_encrypt": false
 }
 EOF
 ```
 
-The above command will:
-- start and configure the mautic instance
-- configure a virtual host for trafik to access the instance
+This configuration:
 
-## Get the configuration
-You can retrieve the configuration with
+- Starts and configures the Mautic instance
+- Sets up a virtual host for Traefik to route HTTP/HTTPS traffic to Mautic
+- Enables HTTP to HTTPS redirection if `http2https` is true
 
-```
+### 3. Verify Configuration
+
+Get the current configuration to ensure everything is set up correctly:
+
+```bash
 api-cli run get-configuration --agent module/mautic1
 ```
 
+### 4. Access the Application
+
+- **URL**: `http(s)://mautic.example.com`
+- If `lets_encrypt` is `true`, a certificate will be requested automatically
+- If `lets_encrypt` is `false`, provide your own TLS certificate or use HTTP for internal testing
+- Set `http2https` to `true` if you plan to terminate TLS at the NS8 gateway
+
+Once configured, you can log in to Mautic using the default credentials (check Mautic documentation for initial setup).
+
+---
+
+## Configuration reference
+
+These inputs are accepted by configure-module:
+
+- host (string, required): Fully qualified domain name for public access
+- http2https (boolean, default: true): Redirect plain HTTP to HTTPS at the gateway
+- lets_encrypt (boolean, default: false): Issue a Let's Encrypt certificate for host
+
+Example without Let's Encrypt (internal lab):
+
+```bash
+api-cli run configure-module --agent module/mautic1 --data - <<'EOF'
+{
+  "host": "mautic.lab.local",
+  "http2https": false,
+  "lets_encrypt": false
+}
+EOF
+```
+
+Example with Let's Encrypt:
+
+```bash
+api-cli run configure-module --agent module/mautic1 --data - <<'EOF'
+{
+  "host": "mautic.example.com",
+  "http2https": true,
+  "lets_encrypt": true
+}
+EOF
+```
+
+---
+
+## Update the module
+
+To update the instance to the latest image:
+
+```bash
+api-cli run update-module --data '{"module_url":"ghcr.io/geniusdynamics/mautic:latest","instances":["mautic1"],"force":true}'
+```
+
+---
+
 ## Uninstall
 
-To uninstall the instance:
-```shell
-  remove-module --no-preserve mautic1
-```
-  
+To remove an instance and its data:
 
-## Smarthost setting discovery
-
-Some configuration settings, like the smarthost setup, are not part of the
-`configure-module` action input: they are discovered by looking at some
-Redis keys.  To ensure the module is always up-to-date with the
-centralized [smarthost
-setup](https://geniusdynamics.github.io/ns8-core/core/smarthost/) every time
-mautic starts, the command `bin/discover-smarthost` runs and refreshes
-the `state/smarthost.env` file with fresh values from Redis.
-
-Furthermore if smarthost setup is changed when mautic is already
-running, the event handler `events/smarthost-changed/10reload_services`
-restarts the main module service.
-
-See also the `systemd/user/mautic.service` file.
-
-This setting discovery is just an example to understand how the module is
-expected to work: it can be rewritten or discarded completely.
-
-## Debug
-
-some CLI are needed to debug
-
-- The module runs under an agent that initiate a lot of environment variables (in /home/mautic1/.config/state), it could be nice to verify them
-on the root terminal
-
-    `runagent -m mautic1 env`
-
-- you can become runagent for testing scripts and initiate all environment variables
-  
-    `runagent -m mautic1`
-
- the path become : 
-```
-    echo $PATH
-    /home/mautic1/.config/bin:/usr/local/agent/pyenv/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/usr/
+```bash
+remove-module --no-preserve mautic1
 ```
 
-- if you want to debug a container or see environment inside
- `runagent -m mautic1`
- ```
+Caution: --no-preserve deletes the instance data.
+
+---
+
+## Smarthost discovery (SMTP)
+
+Some configuration, like outbound SMTP (smarthost), is not passed directly to configure-module. Instead, it is discovered dynamically through Redis keys.
+
+On every Mautic start, the command bin/discover-smarthost refreshes state/smarthost.env with values from Redis to keep the module aligned with the centralized smarthost setup:
+
+- If the smarthost is changed while Mautic is running, the handler events/smarthost-changed/10reload_services restarts the main module service
+- See also systemd/user/mautic.service
+
+This mechanism is an example implementation and can be adapted or replaced.
+
+---
+
+## Debugging
+
+Useful commands when working with an instance named mautic1.
+
+- Inspect environment from the root terminal (loads agent env from /home/mautic1/.config/state):
+
+```bash
+runagent -m mautic1 env
+```
+
+- Enter the agent environment for testing scripts and inheriting module variables:
+
+```bash
+runagent -m mautic1
+```
+
+Your PATH will include:
+
+```
+/home/mautic1/.config/bin:/usr/local/agent/pyenv/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/usr/
+```
+
+- Inspect containers:
+
+```bash
 podman ps
-CONTAINER ID  IMAGE                                      COMMAND               CREATED        STATUS        PORTS                    NAMES
-d292c6ff28e9  localhost/podman-pause:4.6.1-1702418000                          9 minutes ago  Up 9 minutes  127.0.0.1:20015->80/tcp  80b8de25945f-infra
-d8df02bf6f4a  docker.io/library/mariadb:10.11.5          --character-set-s...  9 minutes ago  Up 9 minutes  127.0.0.1:20015->80/tcp  mariadb-app
-9e58e5bd676f  docker.io/library/nginx:stable-alpine3.17  nginx -g daemon o...  9 minutes ago  Up 9 minutes  127.0.0.1:20015->80/tcp  mautic-app
+# Example output
+# CONTAINER ID  IMAGE                                      COMMAND               STATUS        NAMES
+# ...           docker.io/library/mariadb:10.11.5          --character-set-s...  Up           mariadb-app
+# ...           docker.io/library/nginx:stable-alpine3.17  nginx -g daemon o...  Up           mautic-app
 ```
 
-you can see what environment variable is inside the container
-```
-podman exec  mautic-app env
-PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
-TERM=xterm
-PKG_RELEASE=1
-MARIADB_DB_HOST=127.0.0.1
-MARIADB_DB_NAME=mautic
-MARIADB_IMAGE=docker.io/mariadb:10.11.5
-MARIADB_DB_TYPE=mysql
-container=podman
-NGINX_VERSION=1.24.0
-NJS_VERSION=0.7.12
-MARIADB_DB_USER=mautic
-MARIADB_DB_PASSWORD=mautic
-MARIADB_DB_PORT=3306
-HOME=/root
+- Print environment variables inside the app container:
+
+```bash
+podman exec mautic-app env
 ```
 
-you can run a shell inside the container
+- Open a shell in the app container:
 
+```bash
+podman exec -ti mautic-app sh
 ```
-podman exec -ti   mautic-app sh
-/ # 
-```
+
+---
+
 ## Testing
 
-Test the module using the `test-module.sh` script:
+Run the end-to-end tests with Robot Framework using the helper script:
 
+```bash
+./test-module.sh <NODE_ADDR> ghcr.io/geniusdynamics/mautic:latest
+```
 
-    ./test-module.sh <NODE_ADDR> ghcr.io/geniusdynamics/mautic:latest
+See: https://robotframework.org/
 
-The tests are made using [Robot Framework](https://robotframework.org/)
+---
 
-## UI translation
+For detailed UI development instructions, see the [NS8 UI Developer Manual](https://nethserver.github.io/ns8-core/ui/modules/#module-ui-development).
 
-Translated with [Weblate](https://hosted.weblate.org/projects/ns8/).
+### Translation Management
 
-To setup the translation process:
+Translations are managed on Weblate: https://hosted.weblate.org/projects/ns8/
 
-- add [GitHub Weblate app](https://docs.weblate.org/en/latest/admin/continuous.html#github-setup) to your repository
-- add your repository to [hosted.weblate.org]((https://hosted.weblate.org) or ask a NethServer developer to add it to ns8 Weblate project
+To set up translation syncing:
+
+1. Install the GitHub Weblate app: https://docs.weblate.org/en/latest/admin/continuous.html#github-setup
+2. Add the repository on https://hosted.weblate.org (or ask a NethServer developer to include it in the NS8 Weblate project)
+
+Translation files are located in `ui/public/i18n/` and support multiple languages including English, German, Spanish, and more.
+
+---
+
+## Troubleshooting tips
+
+- DNS and certificates: ensure the host value has a valid public DNS A/AAAA record pointing to your NS8 gateway before enabling Let's Encrypt
+- HTTP to HTTPS redirection: set http2https to true when a certificate is available at the gateway
+- Connectivity: verify that port mappings and the Traefik route are active; use podman ps and journal logs
+
+---
+
+## Contributing
+
+Issues and pull requests are welcome! When submitting changes, please include:
+
+- A short description of the change and the motivation
+- Test notes (how you verified the change)
+- Any related documentation updates
+
+### Development Workflow
+
+1. Fork the repository
+2. Create a feature branch: `git checkout -b feature/your-feature-name`
+3. Make your changes and test thoroughly
+4. Run tests: `./test-module.sh <NODE_ADDR> ghcr.io/geniusdynamics/mautic:latest`
+5. Submit a pull request with a clear description
+
+## License
+
+This project is licensed under the GPL-3.0 License. See the [LICENSE](LICENSE) file for details.

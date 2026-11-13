@@ -18,7 +18,7 @@ reponame="mautic"
 # renovate: datasource=npm packageName=corepack
 corepack_version=0.36.0
 # renovate: datasource=docker packageName=docker.io/mautic/mautic
-mautic_version=6-apache
+mautic_version=6.0.9-apache
 
 # Create a new empty container image
 container=$(buildah from scratch)

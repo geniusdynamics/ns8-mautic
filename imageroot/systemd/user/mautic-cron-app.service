@@ -1,0 +1,45 @@
+#
+# Copyright (C) 2022 Nethesis S.r.l.
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+
+[Unit]
+Description=Podman  mautic-cron-app.service
+BindsTo=mautic.service
+After=mautic.service mariadb-app.service
+
+[Service]
+Environment=PODMAN_SYSTEMD_UNIT=%n
+EnvironmentFile=%S/state/environment
+EnvironmentFile=-%S/state/smarthost.env
+EnvironmentFile=-%S/state/app.env
+EnvironmentFile=-%S/state/mautic.env
+WorkingDirectory=%S/state
+Restart=always
+TimeoutStopSec=70
+ExecStartPre=/bin/mkdir -p tmp
+ExecStartPre=/bin/rm -f %t/mautic-cron-app.pid %t/mautic-cron-app.ctr-id
+ExecStartPre=-runagent discover-smarthost
+ExecStart=/usr/bin/podman run --conmon-pidfile %t/mautic-cron-app.pid \
+    --cidfile %t/mautic-cron-app.ctr-id --cgroups=no-conmon \
+    --pod-id-file %t/mautic.pod-id --replace -d --name  mautic-cron-app \
+    --volume mautic-config:/var/www/html/config:z \
+    --volume mautic-logs:/var/www/html/var/logs:z \
+    --volume mautic-files:/var/www/html/docroot/media/files:z \
+    --volume mautic-images:/var/www/html/docroot/media/images:z \
+    --volume mautic-cron:/opt/mautic/cron:z \
+    --volume %S/bin/install:/install:z \
+    --env-file=%S/state/app.env \
+    --env-file=%S/state/mautic.env \
+    --env DOCKER_MAUTIC_ROLE=mautic_cron \
+    ${MAUTIC_IMAGE}
+# ExecStartPost=/usr/bin/podman exec mautic-cron-app /bin/bash -c "/install"
+ExecStop=/usr/bin/podman stop --ignore --cidfile %t/mautic-cron-app.ctr-id -t 10
+ExecReload=/usr/bin/podman kill -s HUP mautic-cron-app
+SyslogIdentifier=%u
+ExecStopPost=/usr/bin/podman rm --ignore -f --cidfile %t/mautic-cron-app.ctr-id
+PIDFile=%t/mautic-cron-app.pid
+Type=forking
+
+[Install]
+WantedBy=default.target

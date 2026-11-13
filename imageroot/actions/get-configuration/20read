@@ -29,5 +29,10 @@ if os.path.exists("mautic.env"):
     config["admin_username"] = mautic_env.get("MAUTIC_ADMIN_USERNAME", "")
     config["admin_email"] = mautic_env.get("MAUTIC_ADMIN_EMAIL", "")
     config["admin_password"] = mautic_env.get("MAUTIC_ADMIN_PASSWORD", "")
+
+if os.path.exists("database.env"):
+    db_env = agent.read_envfile("database.env")
+    config["db_password"] = db_env.get("MARIADB_PASSWORD")
+
 # Dump the configuration to stdout
 json.dump(config, fp=sys.stdout)

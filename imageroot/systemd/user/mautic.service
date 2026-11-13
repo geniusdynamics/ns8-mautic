@@ -10,8 +10,8 @@
 
 [Unit]
 Description=Podman mautic.service
-Requires=mariadb-app.service mautic-app.service
-Before=mariadb-app.service mautic-app.service
+Requires=mariadb-app.service mautic-app.service mautic-cron-app.service  mautic-worker-app.service
+Before=mariadb-app.service mautic-app.service mautic-cron-app.service  mautic-worker-app.service
 
 [Service]
 Environment=PODMAN_SYSTEMD_UNIT=%n
